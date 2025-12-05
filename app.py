@@ -19,7 +19,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 client = Groq(api_key=GROQ_API_KEY)
 
-MODEL_NAME = "llama3-groq-70b"
+MODEL_NAME = "llama-3.1-70b-versatile"
 
 SYSTEM_PROMPT = """
 Kamu adalah Mining Safety & Operational Assistant (MSOA).
@@ -67,6 +67,7 @@ async def chat(req: ChatRequest):
     reply = completion.choices[0].message["content"]
 
     return {"reply": reply}
+
 
 
 
