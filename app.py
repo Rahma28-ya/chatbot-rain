@@ -12,7 +12,6 @@ load_dotenv()
 app = FastAPI()
 
 # Serve static files + templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Load Groq API Key
@@ -68,3 +67,4 @@ async def chat(req: ChatRequest):
     reply = completion.choices[0].message["content"]
 
     return {"reply": reply}
+
