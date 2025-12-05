@@ -3,7 +3,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-import httpx
+from groq import Groq
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -11,8 +15,12 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-MODEL_NAME = "llama3.2"
-OLLAMA_URL = "https://YOUR_TUNNEL_DOMAIN/api/generate"
+# Load Groq API Key
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+client = Groq(api_key=GROQ_API_KEY)
+
+MODEL_NAME = "llama3-8b-8192"
 
 SYSTEM_PROMPT = """
 Kamu adalah Mining Safety & Operational Assistant (MSOA).
@@ -38,31 +46,25 @@ class ChatRequest(BaseModel):
     message: str
 
 
-#  UI ROUTE (INDEX.HTML)
+# UI route
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-#  CHAT API ROUTE (FASTAPI -> OLLAMA)
+
+# Chat route (FastAPI → Groq)
 @app.post("/chat")
 async def chat(req: ChatRequest):
 
-    prompt = (
-        SYSTEM_PROMPT
-        + "\nUser: " + req.message
-        + "\nBot:"
+    completion = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": req.message}
+        ],
+        temperature=0.5,
     )
 
-    payload = {
-        "model": MODEL_NAME,
-        "prompt": prompt,
-        "stream": False,
-    }
-
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(OLLAMA_URL, json=payload)
-
-    data = response.json()
-    reply = data.get("response", "⚠ Tidak ada respons dari model.")
+    reply = completion.choices[0].message["content"]
 
     return {"reply": reply}
