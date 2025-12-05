@@ -2,4 +2,6 @@ fastapi
 uvicorn[standard]
 jinja2
 python-multipart
-requests
+httpx
+groq
+python-dotenv
