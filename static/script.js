@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         input.value = "";
 
         try {
-            const response = await fetch("/chat", {
+            const response = await fetch("https://chatbot-rain-production.up.railway.app/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userText }),
@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json();
 
-            // baca field sesuai format API FastAPI
             const botReply =
                 data.reply ||
                 data.response ||
@@ -42,10 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Klik tombol
     sendBtn.addEventListener("click", sendMessage);
 
-    // Tekan Enter
     input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") sendMessage();
     });
