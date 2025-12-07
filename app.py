@@ -64,7 +64,7 @@ async def chat(req: ChatRequest):
         temperature=0.5,
     )
 
-    reply = completion.choices[0].message["content"]
+    reply = completion.choices[0].message.content
 
     return {"reply": reply}
 
