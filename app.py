@@ -12,7 +12,7 @@ load_dotenv()
 
 app = FastAPI()
 
-# ====== CORS (INI YANG PENTING) ======
+# CORS (INI YANG PENTING)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],      # ganti domain frontend kalau mau lebih aman
@@ -21,11 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====== Static & Templates ======
+# Static & Templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# ====== Groq Config ======
+# Groq Config 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -54,15 +54,15 @@ Gaya bahasa:
 class ChatRequest(BaseModel):
     message: str
 
-# ====== UI Route ======
+# UI Route 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# ====== Chat API ======
+
+# Chat API
 @app.post("/chat")
 async def chat(req: ChatRequest):
-
     completion = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
@@ -71,6 +71,17 @@ async def chat(req: ChatRequest):
         ],
         temperature=0.5,
     )
-
     reply = completion.choices[0].message.content
     return {"reply": reply}
+
+
+# TAMBAHAN ANTI-405
+@app.get("/chat")
+async def chat_get():
+    return {"message": "Use POST /chat"}
+
+@app.options("/chat")
+async def chat_options():
+    return Response(status_code=200)
+
+
